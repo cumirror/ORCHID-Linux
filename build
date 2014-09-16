@@ -1,0 +1,77 @@
+#!/bin/bash
+
+TOPDIR=`pwd`
+INCLUDE=$TOPDIR/include
+OUTPUT=$TOPDIR/output
+LIBREGEXDIR=$TOPDIR/regexParse
+
+show_help() {
+	echo "Usage: $0 [option]"
+	echo -e "\t --all           build all"
+	echo -e "\t --test          build all and test"
+	echo -e "\t --clean-all     clean"
+	echo ""
+}
+
+clean_all()
+{
+	cd $TOPDIR/app_identify/loader
+	make clean
+	cd $LIBREGEXDIR
+	make clean
+	cd $TOPDIR/app_identify
+	make clean
+}
+
+build_pre() {
+	cd $TOPDIR/app_identify/loader
+    make
+	cd $TOPDIR
+}
+
+build_libregex() {
+	cd $LIBREGEXDIR
+    make
+	cd $TOPDIR
+}
+
+build_app_identify() {
+    build_pre
+	cd $TOPDIR/app_identify
+    make
+	cd $TOPDIR
+}
+
+build_test() {
+    cd output
+    ./test sig.conf youku_tudou.pcap
+}
+
+if [ $# == 0 ]; then
+	build_libregex
+	build_app_identify
+elif [ $# == 1 ]; then
+	case $1 in
+		--all)
+			build_libregex
+			build_app_identify
+			shift
+			;;
+		--test)
+			build_libregex
+			build_app_identify
+            build_test
+			shift
+			;;
+		--clean-all)
+			clean_all
+			shift
+			;;
+		*)
+			show_help
+			shift
+			;;
+	esac
+else
+	show_help
+fi
