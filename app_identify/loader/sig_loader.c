@@ -15,6 +15,7 @@ void Regex_Test(struct app_entry_list *apps, char *Text);
 extern void init_http_sig(struct app_entry_list *app_list);
 extern int parse_http_sig(struct app_entry_list *app_list, char *sig, int sig_index, int type);
 extern void http_dump_sig_entrys(struct app_entry_list *app_list);
+int sig_parse_adapter_ac(struct app_entry_list *app_list);
 
 extern FILE* yyin;
 extern int yyparse();
@@ -114,6 +115,7 @@ struct dfa_graph_t *parseApplication(struct application_list* root)
 	}
 
     //http_dump_sig_entrys(&app_list);
+    sig_parse_adapter_ac(&app_list);
 	return Regex_Parse(&app_list);
 }
 

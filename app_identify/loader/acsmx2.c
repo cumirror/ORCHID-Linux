@@ -3217,22 +3217,16 @@ int sig_parse_adapter_ac(struct app_entry_list *apps)
 
   acsm->acsmFormat = ACF_BANDED;
   nc = 1;
-  s_verbose=1;
+  //s_verbose=1; /* for more DFA information */
 
   STAILQ_FOREACH(app, apps, next) {
     acsmAddPattern2(acsm, (unsigned char *)app->regex, strlen(app->regex), 
             nc, 0, 0, 0, (void*)p, app->appId);
   }
 
-  if(s_verbose)printf("Patterns added\n");
-
   Print_DFA (acsm);
 
   acsmCompile2(acsm, NULL, NULL);
-
-  //Write_DFA(acsm, "acsmx2-snort.dfa") ;
-
-  if(s_verbose) printf("Patterns compiled--written to file.\n");
 
   acsmPrintInfo2 ( acsm );
 
