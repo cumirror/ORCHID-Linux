@@ -2995,7 +2995,7 @@ void acsmPrintInfo2( ACSM_STRUCT2 * p)
     printf("| Memory           : %.2fMbytes\n", (float)acsm2_total_memory/(1024*1024) );
     printf("+-------------------------------------------------------------\n");
 
-    /* Print_DFA(acsm); */
+    //Print_DFA(acsm);
 
 }
 
@@ -3196,7 +3196,7 @@ char text[] = {
  int
 MatchFound (void * id, void *tree, int index, void *data, void *neg_list)
 {
-  fprintf (stdout, "%s\n", (char *) id);
+  fprintf (stdout, "Found %s offset %d\n", (char *) id, index);
   return 0;
 }
 
@@ -3216,25 +3216,20 @@ int sig_parse_adapter_ac(struct app_entry_list *apps)
   }
 
   acsm->acsmFormat = ACF_BANDED;
+  /* no case sensitive for higher performance */
   nc = 1;
-  //s_verbose=1; /* for more DFA information */
+  /* you could set s_verbose = 1 for more DFA information */
+  s_verbose = 0;
 
   STAILQ_FOREACH(app, apps, next) {
     acsmAddPattern2(acsm, (unsigned char *)app->regex, strlen(app->regex), 
             nc, 0, 0, 0, (void*)p, app->appId);
   }
 
-  Print_DFA (acsm);
-
   acsmCompile2(acsm, NULL, NULL);
-
   acsmPrintInfo2 ( acsm );
-
   acsmSearch2 (acsm, (unsigned char *)text, strlen (text), MatchFound, (void *)0, &cur_state );
-
   acsmFree2 (acsm);
-
-  printf ("normal pgm end\n");
 
   return (0);
 }

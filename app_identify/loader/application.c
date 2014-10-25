@@ -18,3 +18,20 @@ struct app_entry_t *new_app_sig(int id, char *sig)
 	return entry;
 }
 
+struct element_s *new_sig_element(int id, char *sig)
+{
+	struct element_s *entry;
+
+	if (strlen(sig) >= MAX_SIG_LENGTH)
+		return NULL;
+
+	entry = (struct element_s *)malloc(sizeof(struct element_s));
+
+	if (entry) {
+		entry->id = id;
+		strcpy(entry->match, sig);
+	}
+
+	return entry;
+}
+

@@ -8,7 +8,7 @@
  *  sig http_host=youku&http_ua=nt&http_re=baidu
  */
 
-/* TODO */
+/* TODO: more readable! */
 void init_http_sig(struct app_entry_list *app_list)
 {
     struct app_entry_t *sig_entry;
@@ -70,7 +70,34 @@ void http_dump_sig_entrys(struct app_entry_list *app_list)
     return;
 }
 
-/* TODO: escape character */
+/* TODO: for other proto such as tcp/udp,
+ *       We should support offset, such as tcp_payload[10]=abc
+ * */
+int parse_http_sig_(struct element_list *list, char *sig, int type)
+{
+    char delims[] = "&";
+    char *result = NULL;
+    int n = 0;
+
+    result = (char*)strtok(sig, delims);
+    while(result != NULL) {
+        int element_id = get_element_id_from_sig(result);
+        char *match = get_key_from_sig(result);
+        struct element_s *element_entry = NULL;
+
+        element_entry = new_sig_element(element_id, match);
+		STAILQ_INSERT_TAIL(list, element_entry, next);
+
+        result = (char*)strtok(NULL, delims);
+        if (type == SIG_SINGLE && result)
+            assert(0);
+
+        n++;
+    }
+
+    return n;
+}
+/* TODO: escape character, such as 0x3d is '=' */
 int parse_http_sig(struct app_entry_list *app_list, char *sig, int sig_index, int type)
 {
     char delims[] = "&";

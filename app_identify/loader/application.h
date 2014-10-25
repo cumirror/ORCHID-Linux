@@ -17,6 +17,13 @@
 #define SIG_SINGLE 1
 #define SIG_REGEX 3
 
+struct element_s {
+	uint id;
+	char match[MAX_SIG_LENGTH];
+	STAILQ_ENTRY(element_s) next;
+};
+STAILQ_HEAD(element_list, element_s);
+
 struct sig_s {
 	uint id;
 	uint proto;
@@ -25,6 +32,8 @@ struct sig_s {
 	uint priority;
 	uint dir;
 	char match[MAX_SIG_LENGTH];
+	uint ele_num;
+    struct element_list elements;
 	STAILQ_ENTRY(sig_s) next;
 };
 STAILQ_HEAD(sig_list, sig_s);
@@ -39,6 +48,7 @@ struct application_s {
 STAILQ_HEAD(application_list, application_s);
 
 struct app_entry_t *new_app_sig(int id, char *sig);
+struct element_s *new_sig_element(int id, char *sig);
 
 inline struct sig_list* create_sig_list()
 {
@@ -57,6 +67,9 @@ inline struct sig_s* create_sig()
     struct sig_s *sig =
         (struct sig_s *)malloc(sizeof(struct sig_s));
 
+    if (sig != NULL) {
+        STAILQ_INIT(&(sig->elements));
+    }
     return sig;
 }
 
@@ -79,4 +92,42 @@ inline struct application_list* create_application_list()
 
     return head;
 }
+
+#define MAX_CATEGORY_ID 16
+struct app_statistics_s {
+	uint cate_index[MAX_CATEGORY_ID];
+	uint cate_num[MAX_CATEGORY_ID];
+	uint app_nums;
+	uint sig_nums;
+	uint ele_nums;
+};
+
+struct app_entry_s {
+	uint appname;
+	uint appid;
+	uint sig_index;
+	uint sig_num;
+};
+
+struct sig_entry_s {
+	uint sigid;
+	uint proto;
+	//uint type;
+	uint enable;
+	uint priority;
+    int F_ele_index;
+};
+
+struct element_entry_s {
+	ushort sigindex;
+	ushort flag;
+	ushort exp_ele_index;
+};
+
+struct app_info_s {
+    struct app_entry_s *apps;
+    struct sig_entry_s *sigs;
+    struct element_entry_s *eles;
+};
+
 #endif

@@ -5,7 +5,7 @@ OUTPUT_DIR = $(TOP_DIR)/output
 
 include $(TOP_DIR)/rules.mk
 
-#CFLAGS += -g -Wall
+CFLAGS += -g -Wall
 CFLAGS += -I$(TOP_DIR)/include
 
 LDFLAGS += -L$(TOP_DIR)/Lib

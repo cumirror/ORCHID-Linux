@@ -59,7 +59,7 @@ int httpParse(struct dfa_graph_t *graph, uchar *Text, int len)
                     //http_head[element_id] = Text + start;
                 }
             } else {
-			    printf("element id %d last id %d, pattern id %d, index %d\n",
+			    printf("element id %d last id %d, pattern id %x, index %d\n",
 				    element_id, element_last, match_id, pattern_count);
                 if (element_id == element_last) {
                     pattern[pattern_count++] = curState[1];

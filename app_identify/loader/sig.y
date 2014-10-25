@@ -13,6 +13,7 @@ void yyerror(char *s)
 extern int yylex();
 
 extern struct application_list* app_root;
+extern int parse_http_sig_(struct element_list *list, char *sig, int type);
 
 %}
 
@@ -98,6 +99,7 @@ app_sig:
         sig->dir = get_int_value_from_key($3, "sig_dir");
         assert(strlen(match) < MAX_SIG_LENGTH);
         strcpy(sig->match, match);
+        sig->ele_num = parse_http_sig_(&(sig->elements), match, sig->type);
 
         $$ = sig;
 
