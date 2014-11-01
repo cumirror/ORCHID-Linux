@@ -1,9 +1,17 @@
 #include "pktHeader.h"
 #include "session.h"
+#include "loader/acsmx2.h"
+#include "common.h"
 
 extern int dfaSearch(struct dfa_graph_t *graph, uchar *Text, int len);
+#ifdef TEST_REGEX
 extern int httpParse(struct dfa_graph_t *graph, uchar *Text, int len);
 extern struct dfa_graph_t *appgraph;
+#endif
+#ifdef TEST_AC
+extern int httpParse2(ACSM_STRUCT2 *graph, uchar *Text, int len);
+extern ACSM_STRUCT2 *appgraph2;
+#endif
 
 void packet_handler(u_char *param, const struct pcap_pkthdr *pkthdr, const u_char *pktdata)
 {
@@ -57,9 +65,15 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *pkthdr, const u_cha
 	sess = session_table_find(ih->saddr, ih->daddr, sport, dport, ih->proto);
 
 	if (sess->app_id == 0) {
-		if (payload_len > 0)
+		if (payload_len > 0) {
+#ifdef TEST_AC
+			sess->app_id = httpParse2(appgraph2, payload, payload_len);
+#endif
+#ifdef TEST_REGEX
 			sess->app_id = httpParse(appgraph, payload, payload_len);
-	}
+#endif
+        }
+    }
 
 	return;
 }

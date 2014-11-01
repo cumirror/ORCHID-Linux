@@ -1,12 +1,12 @@
 TOP_DIR = ..
 MOD_DIR = .
-INCLUDE = -I$(TOP_DIR)/include
+INCLUDE = -I$(TOP_DIR)/include -I$(MOD_DIR)/include
 OUTPUT_DIR = $(TOP_DIR)/output
 
 include $(TOP_DIR)/rules.mk
 
 CFLAGS += -g -Wall
-CFLAGS += -I$(TOP_DIR)/include
+CFLAGS += -I$(TOP_DIR)/include -I$(MOD_DIR)/include
 
 LDFLAGS += -L$(TOP_DIR)/Lib
 LDFLAGS += -lpcap -lregex

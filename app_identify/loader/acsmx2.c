@@ -2760,7 +2760,7 @@ acsmSearchSparseDFA_Banded(ACSM_STRUCT2 * acsm, unsigned char *Tx, int n,
         {
             index = T - mlist->n - Tx;
             nfound++;
-            if (Match (mlist->udata, mlist->rule_option_tree, index, data, mlist->neg_list) > 0)
+            if (Match ((void *)(mlist->iid), NULL, index, (void*)(Tx + index), NULL) > 0)
             {
                 *current_state = state;
                 return nfound;
@@ -3190,26 +3190,16 @@ char text[] = {
 0x5f, 0x4c, 0x4f, 0x47, 0x4f, 0x55, 0x54, 0x5f, 
 0x5f, 0x0d, 0x0a, 0x0d, 0x0a };
 
-/*
-*    A Match is found
-*/
- int
-MatchFound (void * id, void *tree, int index, void *data, void *neg_list)
-{
-  fprintf (stdout, "Found %s offset %d\n", (char *) id, index);
-  return 0;
-}
+extern int MatchFound (void *id, void *tree, int index, void *data, void *neg_list);
 
-int sig_parse_adapter_ac(struct app_entry_list *apps)
+ACSM_STRUCT2* sig_parse_adapter_ac(struct app_entry_list *apps)
 {
-  int i, nc, nocase = 0;
+  int nc, nocase = 0;
   ACSM_STRUCT2 * acsm;
-  char * p;
   struct app_entry_t *app;
-  int cur_state = 0;
 
   acsm = acsmNew2(NULL, NULL, NULL);
-  if( !acsm )
+  if (!acsm)
   {
      printf("acsm-no memory\n");
      exit(0);
@@ -3223,14 +3213,12 @@ int sig_parse_adapter_ac(struct app_entry_list *apps)
 
   STAILQ_FOREACH(app, apps, next) {
     acsmAddPattern2(acsm, (unsigned char *)app->regex, strlen(app->regex), 
-            nc, 0, 0, 0, (void*)p, app->appId);
+            nc, 0, 0, 0, (void*)NULL, app->appId);
   }
 
   acsmCompile2(acsm, NULL, NULL);
-  acsmPrintInfo2 ( acsm );
-  acsmSearch2 (acsm, (unsigned char *)text, strlen (text), MatchFound, (void *)0, &cur_state );
-  acsmFree2 (acsm);
-
-  return (0);
+  //acsmPrintInfo2 ( acsm );
+  //acsmFree2 (acsm);
+  return acsm;
 }
 

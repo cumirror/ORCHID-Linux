@@ -120,6 +120,9 @@ struct sig_entry_s {
 
 struct element_entry_s {
 	ushort sigindex;
+#define ELEMENT_START 1
+#define ELEMENT_MID   2
+#define ELEMENT_END   4
 	ushort flag;
 	ushort exp_ele_index;
 };
@@ -130,4 +133,5 @@ struct app_info_s {
     struct element_entry_s *eles;
 };
 
+extern struct app_info_s app_array;
 #endif

@@ -1,8 +1,10 @@
 #include "application.h"
+#include "acsmx2.h"
 #include <regexParse.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,17 +17,20 @@ void Regex_Test(struct app_entry_list *apps, char *Text);
 extern void init_http_sig(struct app_entry_list *app_list);
 extern int parse_http_sig(struct app_entry_list *app_list, char *sig, int sig_index, int type);
 extern void http_dump_sig_entrys(struct app_entry_list *app_list);
-int sig_parse_adapter_ac(struct app_entry_list *app_list);
+extern ACSM_STRUCT2* sig_parse_adapter_ac(struct app_entry_list *app_list);
 
 extern FILE* yyin;
 extern int yyparse();
 struct application_list* app_root = NULL;
 
+#ifdef TEST_REGEX
 struct dfa_graph_t *appgraph;
-struct app_entry_list app_list;
+#endif
 
-#define TEST_AC
-#define TEST_REGEX
+#ifdef TEST_AC
+ACSM_STRUCT2* appgraph2;
+#endif
+struct app_entry_list app_list;
 
 void loadApp(const char *file)
 {
@@ -163,6 +168,10 @@ int get_Application_summary(struct application_list* root)
 	return 0;
 }
 
+/*
+ * we just assue elemet_num < 65535
+ *
+ * */
 struct app_info_s app_array;
 int install_Application(struct application_list* root)
 {
@@ -172,7 +181,6 @@ int install_Application(struct application_list* root)
 	uint cate_offset[MAX_CATEGORY_ID] = {0};
     uint sig_offset = 0;
     uint ele_offset = 0;
-    uint flag = 0;
 
 	struct application_s *app = NULL;
     struct sig_s *sig = NULL;
@@ -208,6 +216,7 @@ int install_Application(struct application_list* root)
         cur_app->appid = app->id;
         cur_app->sig_index = sig_offset;
         STAILQ_FOREACH(sig, app->sigs, next) {
+            uint ele_num = 0;
             cur_sig = sigs + sig_offset;
             /* TODO: appCD + appID? */
             cur_sig->sigid = ((app->category & 0xFFFF) << 16) |
@@ -216,10 +225,8 @@ int install_Application(struct application_list* root)
             cur_sig->enable = sig->enable;
             cur_sig->priority = sig->priority;
             /* TODO: how to deal with http_method? */
-            cur_sig->F_ele_index = ele_offset;
-            if (sig->ele_num > 1)
-                flag = 1;
-
+            /* if it's first ele, we set a flag */
+            //cur_sig->F_ele_index = ele_offset;
             STAILQ_FOREACH(element, &(sig->elements), next) {
                 /* update element id */
                 element->id = ((element->id & 0xFF)<<24) | 
@@ -231,11 +238,17 @@ int install_Application(struct application_list* root)
 #endif
                 cur_ele = eles + ele_offset;
                 cur_ele->sigindex = sig_offset;
-                cur_ele->flag = flag;
+                if (ele_num == 0)
+                    cur_ele->flag |= ELEMENT_START;
+                else
+                    cur_ele->flag |= ELEMENT_MID;
                 cur_ele->exp_ele_index = ++ele_offset;
+                ele_num++;
             }
-            if (sig->ele_num != 0)
-                cur_ele->exp_ele_index = 0xFFFF; 
+            if (ele_num > 0) {
+                cur_ele->flag |= ELEMENT_END;
+                cur_ele->exp_ele_index = 0xFFFF;
+            }
 
             sig_offset++;
 		}
@@ -295,7 +308,7 @@ int load_sig(const char *file)
 
 #ifdef TEST_AC
     /* TODO: get pattern list when parse_http_sig_ */
-    sig_parse_adapter_ac(&app_list);
+    appgraph2 = sig_parse_adapter_ac(&app_list);
 #endif
 
 #ifdef TEST_REGEX
